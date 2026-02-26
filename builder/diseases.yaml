@@ -1,0 +1,39 @@
+# builder/diseases.yaml
+# Each disease entry drives both single and batch skill generation.
+# toc_file: primary TOC filename in evidence/d/table-of-contents/
+# keywords: used for cross-specialty keyword search
+# cross_specialty_tocs: additional TOC files to keyword-search
+
+diseases:
+  asthma:
+    display_name: "Asthma"
+    specialty: allergy-and-immunology
+    toc_file: allergy-and-immunology_asthma.js
+    keywords:
+      - asthma
+      - bronchospasm
+      - wheezing
+      - LABA
+      - ICS
+      - inhaled corticosteroid
+      - bronchodilator
+    cross_specialty_tocs:
+      - pulmonary-and-critical-care-medicine_asthma.js
+      - emergency-medicine-adult-and-pediatric_adult-medical-emergencies.js
+
+  diabetes-type2:
+    display_name: "Type 2 Diabetes"
+    specialty: endocrinology-and-diabetes
+    toc_file: endocrinology-and-diabetes_diabetes-mellitus.js
+    keywords:
+      - type 2 diabetes
+      - T2DM
+      - metformin
+      - HbA1c
+      - insulin resistance
+      - hyperglycemia
+      - GLP-1
+      - SGLT2
+    cross_specialty_tocs:
+      - cardiovascular-medicine_coronary-heart-disease.js
+      - nephrology-and-hypertension_renal-disease.js
