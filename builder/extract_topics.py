@@ -10,7 +10,9 @@ TOC_DIR = EVIDENCE_BASE / "table-of-contents"
 
 def load_toc(toc_filename: str) -> dict:
     """Load and parse a table-of-contents .js file."""
-    path = TOC_DIR / toc_filename
+    path = (TOC_DIR / toc_filename).resolve()
+    if not path.is_relative_to(TOC_DIR.resolve()):
+        raise ValueError(f"TOC path escapes evidence directory: {toc_filename}")
     content = path.read_text(encoding="utf-8")
     match = re.match(r'^var data=(.+)$', content.strip(), re.DOTALL)
     if not match:

@@ -6,7 +6,8 @@ import yaml
 import argparse
 from datetime import date
 from pathlib import Path
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import FileSystemLoader
+from jinja2.sandbox import SandboxedEnvironment
 
 from builder.extract_topics import discover_topics
 from builder.preprocess import extract_topic_markdown
@@ -19,16 +20,21 @@ TEMPLATES_DIR = BUILDER_DIR / "templates"
 BUCKETS = ["overview", "diagnosis", "treatment", "monitoring", "drugs"]
 
 
-def load_diseases_config() -> dict:
-    """Load disease definitions from diseases.yaml."""
+def load_diseases_config() -> dict[str, dict]:
     config_path = BUILDER_DIR / "diseases.yaml"
-    with open(config_path) as f:
-        return yaml.safe_load(f)["diseases"]
+    try:
+        with open(config_path) as f:
+            data = yaml.safe_load(f)
+    except (OSError, yaml.YAMLError) as e:
+        raise RuntimeError(f"Failed to load diseases.yaml: {e}") from e
+    if not isinstance(data, dict) or "diseases" not in data:
+        raise RuntimeError("diseases.yaml must contain a top-level 'diseases' key")
+    return data["diseases"]
 
 
-def group_topics_by_bucket(topics: list[dict]) -> dict:
+def group_topics_by_bucket(topics: list[dict]) -> dict[str, list[dict]]:
     """Classify topics into clinical buckets."""
-    groups = {b: [] for b in BUCKETS}
+    groups: dict[str, list[dict]] = {b: [] for b in BUCKETS}
     for topic in topics:
         bucket = classify_topic(topic["name"])
         groups[bucket].append(topic)
@@ -68,7 +74,7 @@ def render_skill_files(
         json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
-    env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
+    env = SandboxedEnvironment(loader=FileSystemLoader(str(TEMPLATES_DIR)))
     context = {
         "disease_id": disease_id,
         "display_name": display_name,
@@ -106,7 +112,10 @@ def _build_slug_index() -> dict:
     # Step 2: Scan topic files to build title->file mapping
     title_to_file: dict[str, Path] = {}
     for topic_file in EVIDENCE_TOPICS_DIR.glob("*.js"):
-        file_content = topic_file.read_text(encoding="utf-8", errors="ignore")
+        try:
+            file_content = topic_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
         title_match = re.search(r'"title":"([^"]+)"', file_content)
         if title_match:
             title_to_file[title_match.group(1)] = topic_file
@@ -138,7 +147,7 @@ def build_disease(disease_id: str, config: dict) -> None:
         try:
             parsed = extract_topic_markdown(js_file.read_text(encoding="utf-8"))
             topics_with_markdown.append({**item, "markdown": parsed["markdown"]})
-        except Exception as e:
+        except (json.JSONDecodeError, ValueError, OSError) as e:
             print(f"[warn] Failed to parse {js_file.name}: {e}")
             topics_with_markdown.append({**item, "markdown": ""})
 
