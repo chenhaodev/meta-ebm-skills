@@ -88,24 +88,34 @@ def render_skill_files(
 
 
 def _build_slug_index() -> dict:
-    """Build mapping from topic slug -> Path of .js file using qindex files."""
+    """Build mapping from topic slug -> Path of .js file.
+
+    Uses titles.js (slug->title) combined with a scan of topic files (title->id)
+    to build the complete slug->filepath mapping.
+    """
+    # Step 1: Parse titles.js to get slug->title
+    titles_path = BUILDER_DIR.parent / "evidence" / "d" / "sfiles" / "titles.js"
+    if not titles_path.exists():
+        return {}
+    titles_content = titles_path.read_text(encoding="utf-8", errors="ignore")
+    match = re.match(r"^var titles=(.+);$", titles_content.strip(), re.DOTALL)
+    if not match:
+        return {}
+    slug_to_title = json.loads(match.group(1))
+
+    # Step 2: Scan topic files to build title->file mapping
+    title_to_file: dict[str, Path] = {}
+    for topic_file in EVIDENCE_TOPICS_DIR.glob("*.js"):
+        file_content = topic_file.read_text(encoding="utf-8", errors="ignore")
+        title_match = re.search(r'"title":"([^"]+)"', file_content)
+        if title_match:
+            title_to_file[title_match.group(1)] = topic_file
+
+    # Step 3: Combine slug->title->file
     slug_to_file = {}
-    qindex_dir = BUILDER_DIR.parent / "evidence" / "d" / "qindex"
-    if not qindex_dir.exists():
-        return slug_to_file
-    for qfile in qindex_dir.glob("*.js"):
-        content = qfile.read_text(encoding="utf-8", errors="ignore")
-        match = re.match(r'^var data=(.+)$', content.strip(), re.DOTALL)
-        if not match:
-            continue
-        try:
-            data = json.loads(match.group(1))
-            for slug, topic_id in data.items():
-                js_path = EVIDENCE_TOPICS_DIR / f"{topic_id}.js"
-                if js_path.exists():
-                    slug_to_file[slug] = js_path
-        except Exception:
-            continue
+    for slug, title in slug_to_title.items():
+        if title in title_to_file:
+            slug_to_file[slug] = title_to_file[title]
     return slug_to_file
 
 

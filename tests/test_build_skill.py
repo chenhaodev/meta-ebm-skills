@@ -48,3 +48,10 @@ def test_render_skill_index_json(tmp_path):
     assert "asthma-overview" in index
     assert index["asthma-overview"]["bucket"] == "overview"
     assert index["asthma-overview"]["file"] == "overview.md"
+
+def test_build_slug_index_returns_dict():
+    from builder.build_skill import _build_slug_index
+    result = _build_slug_index()
+    assert isinstance(result, dict)
+    # Should resolve at least some slugs if titles.js exists
+    assert len(result) > 0
