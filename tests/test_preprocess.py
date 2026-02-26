@@ -25,3 +25,27 @@ def test_strip_noise_removes_brand_names_section():
     result = extract_topic_markdown(js)
     assert "Brand Names: International" not in result["markdown"]
     assert "Treats pain" in result["markdown"]
+
+
+def test_strip_noise_removes_by_id():
+    """strip_noise removes elements matched by _NOISE_IDS (topicAgreement)."""
+    js = (
+        'var data={"title":"T","body":"<div><p>Keep this.</p>'
+        '<div id=\\"topicAgreement\\"><p>Legal boilerplate</p></div></div>","outline":""}'
+    )
+    result = extract_topic_markdown(js)
+    assert "Keep this" in result["markdown"]
+    assert "Legal boilerplate" not in result["markdown"]
+
+
+def test_strip_noise_removes_topic_agreement_alongside_class():
+    """strip_noise removes both class-based and id-based noise in one pass."""
+    js = (
+        'var data={"title":"T","body":"<div><p>Main content</p>'
+        '<div class=\\"fee\\">Price info</div>'
+        '<div id=\\"topicAgreement\\">Agreement text</div></div>","outline":""}'
+    )
+    result = extract_topic_markdown(js)
+    assert "Main content" in result["markdown"]
+    assert "Price info" not in result["markdown"]
+    assert "Agreement text" not in result["markdown"]
