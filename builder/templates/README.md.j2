@@ -1,0 +1,36 @@
+# cdss-{{ disease_id }}
+
+> **{{ display_name }} CDSS Skill** — powered by UpToDate EBM
+
+## Installation
+
+Copy this directory to `~/.claude/skills/cdss-{{ disease_id }}/`:
+
+```bash
+cp -r skills/{{ disease_id }}/ ~/.claude/skills/cdss-{{ disease_id }}/
+```
+
+Then invoke in Claude Code:
+
+```
+/cdss-{{ disease_id }}
+```
+
+## Evidence Coverage
+
+- **Topics indexed:** {{ topic_count }}
+- **Specialty:** {{ specialty }}
+- **Generated:** {{ generated_date }}
+
+## Buckets
+
+| File | Contents |
+|------|----------|
+{% for bucket in buckets %}| `evidence/{{ bucket }}.md` | {{ bucket | title }} topics |
+{% endfor %}
+
+## Release
+
+```bash
+git tag {{ disease_id }}@{{ version }}
+```
