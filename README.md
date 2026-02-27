@@ -174,7 +174,7 @@ The builder classifies each topic into one of five clinical buckets:
 
 Two-layer design:
 
-1. **Meta skill** (`meta-skill/SKILL.md`) — instructs Claude to run the builder script
+1. **Meta skill** (`.claude/skills/build-cdss-skill/SKILL.md`) — auto-loaded by Claude Code; instructs Claude to run the builder script
 2. **Runtime CDSS skill** (`skills/<disease>/SKILL.md`) — instructs Claude to act as a disease expert using the pre-processed evidence
 
 The builder is deterministic and makes no LLM calls — it runs in seconds per disease.
