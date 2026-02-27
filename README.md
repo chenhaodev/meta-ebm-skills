@@ -77,8 +77,10 @@ meta-ebm-skills/
 │       ├── SKILL.md.j2         # Runtime CDSS skill template
 │       └── README.md.j2        # Skill README template
 │
-├── meta-skill/
-│   └── SKILL.md                # The build-cdss-skill meta skill
+├── .claude/
+│   └── skills/
+│       └── build-cdss-skill/
+│           └── SKILL.md        # The build-cdss-skill meta skill (auto-loaded by Claude Code)
 │
 ├── skills/                     # Generated CDSS skills
 │   └── asthma/                 # Example: Asthma CDSS skill
