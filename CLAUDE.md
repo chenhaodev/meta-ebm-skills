@@ -39,6 +39,5 @@ docs/
 
 ## Development Notes
 
-- No build system exists yet; this is a pre-implementation planning phase.
-- Plans and skill designs go in `docs/plans/`.
+- The builder is implemented in `builder/`. Run `pytest tests/` to verify (36 tests, 96% coverage).
 - The evidence data is JavaScript-wrapped JSON; parse it by stripping the `var data=` prefix and trailing semicolon, then `JSON.parse()`.
